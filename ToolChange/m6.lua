@@ -11,6 +11,7 @@ function m6()
             return
         end
     end
+
     mc.mcCntlSetLastError(inst, "Break 0")
 
     ------ Define slide distance and direction ------
@@ -87,10 +88,10 @@ function m6()
     end
 
     local GCode = ""
-    GCode = GCode .. "G00 G90 G53 Z0.0\n"
-    GCode = GCode .. string.format("G00 G90 G53 X%.4f Y%.4f\n", (XPos - XSlide), (YPos - YSlide))
-    GCode = GCode .. string.format("G00 G90 G53 Z%.4f\n", ZPos)
-    GCode = GCode .. string.format("G00 G90 G53 X%.4f Y%.4f\n", XPos, YPos)
+    GCode = GCode .. "G00 G90 G53 Z0.0\n" -- move to z home
+    GCode = GCode .. string.format("G00 G90 G53 X%.4f Y%.4f\n", (XPos - XSlide), (YPos - YSlide)) -- move to the starting point of the slide
+    GCode = GCode .. string.format("G00 G90 G53 Z%.4f\n", ZPos) -- move down to the level of the tool change
+    GCode = GCode .. string.format("G00 G90 G53 X%.4f Y%.4f\n", XPos, YPos) -- slide in
     mc.mcCntlGcodeExecuteWait(inst, GCode)
 
     ------ Open drawbar ------
@@ -137,21 +138,21 @@ function m6()
     end
 
     GCode = ""
-    GCode = GCode .. string.format("G00 G90 G53 X%.4f Y%.4f\n", XPos, YPos)
-    GCode = GCode .. string.format("G00 G90 G53 Z%.4f\n", ZPos + ZBump)
+    GCode = GCode .. string.format("G00 G90 G53 X%.4f Y%.4f\n", XPos, YPos) -- move over the selected tool
+    GCode = GCode .. string.format("G00 G90 G53 Z%.4f\n", ZPos + ZBump) -- lower onto the tool with added bump.
     mc.mcCntlGcodeExecuteWait(inst, GCode)
 
     ------ Clamp drawbar ------
     mc.mcSignalSetState(hsig, 0)
 
     GCode = ""
-    GCode = GCode .. string.format("G01 G90 G53 Z%.4f F50.0\n", ZPos)
-    GCode = GCode .. string.format("G00 G90 G53 X%.4f Y%.4f\n", (XPos - XSlide), (YPos - YSlide))
+    GCode = GCode .. string.format("G01 G90 G53 Z%.4f F50.0\n", ZPos) -- release bump
+    GCode = GCode .. string.format("G00 G90 G53 X%.4f Y%.4f\n", (XPos - XSlide), (YPos - YSlide)) -- slide out
     mc.mcCntlGcodeExecuteWait(inst, GCode)
 
     ------ Move Z to home position ------
     GCode = ""
-    mc.mcCntlGcodeExecuteWait(inst, "G00 G90 G53 Z0.0\n")
+    mc.mcCntlGcodeExecuteWait(inst, "G00 G90 G53 Z0.0\n") -- raise back up to z home
 
     ------ Reset state ------
     mc.mcCntlSetPoundVar(inst, 2134, CurFeed)
