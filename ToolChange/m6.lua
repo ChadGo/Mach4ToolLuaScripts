@@ -5,6 +5,7 @@ function m6()
     ------ Get and compare next and current tools ------
     local SelectedTool = mc.mcToolGetSelected(inst)
     local CurrentTool = mc.mcToolGetCurrent(inst)
+    
     if (SelectedTool == CurrentTool) then
         mc.mcCntlSetLastError(inst, "Next tool = Current tool")
         do
